@@ -1,10 +1,7 @@
-
-
 from typing import Iterator
 
 from llama_cpp import Llama, CreateChatCompletionStreamResponse
 from .config import ChatHistory
-
 
 # Set model id
 model_id = "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF"
@@ -18,9 +15,9 @@ model = Llama.from_pretrained(
 
 # Prompt setting
 system_prompt = "" \
-    + "You are a helpful, smart, kind, and efficient AI Assistant. " \
-    + "You always fulfill the user's requests to the best of your ability. " \
-    + "Please answer in Korean language."
+                + "You are a helpful, smart, kind, and efficient AI Assistant. " \
+                + "You always fulfill the user's requests to the best of your ability. " \
+                + "Please answer in Korean language."
 print("INFO: Use default system prompt -", system_prompt)
 
 

@@ -1,0 +1,90 @@
+@font-face {
+    font-family: 'SUITE-Regular';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-2@1.0/SUITE-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+}
+
+body {
+    background-color: #f4f6f9;
+    font-family: 'SUITE-Regular', 'Arial', sans-serif;
+}
+
+.chat-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+}
+
+h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+#messages {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    height: 400px;
+    overflow-y: auto;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+#messages li {
+    padding: 12px 15px;
+    border-radius: 15px;
+    margin-bottom: 10px;
+    max-width: 80%;
+    word-wrap: break-word;
+    display: inline-block;
+    clear: both;
+}
+
+.message-client {
+    background-color: #e1f5fe;
+    color: #0277bd;
+    text-align: left;
+    margin-left: auto;
+    border: 1px solid #b3e5fc;
+    border-radius: 15px;
+    float: right;
+}
+
+.message-server {
+    background-color: #ffe0b2;
+    color: #e65100;
+    text-align: left;
+    border: 1px solid #ffcc80;
+    border-radius: 15px;
+    float: left;
+}
+
+.form-inline {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.form-control {
+    border-radius: 25px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    box-shadow: none;
+}
+
+.form-control:focus {
+    border-color: #0277bd;
+    box-shadow: 0 0 0 0.2rem rgba(2, 119, 189, 0.25);
+}
+
+.btn-send {
+    border-radius: 25px;
+    padding: 6px 20px;
+}

@@ -17,7 +17,9 @@ async def send_message():
 
             # 서버로부터 응답 수신
             response = await websocket.recv()
-            print(f"Received from server: {response}")
+
+            response2 = await websocket.recv()
+            print(f"Received from server: {response2}")
 
 # asyncio 이벤트 루프를 실행하여 비동기 함수를 실행
 if __name__ == "__main__":

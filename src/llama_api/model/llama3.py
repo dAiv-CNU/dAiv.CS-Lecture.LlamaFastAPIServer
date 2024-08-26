@@ -6,7 +6,6 @@ from llama_cpp import Llama, CreateChatCompletionStreamResponse
 from .config import ChatHistory
 
 
-
 # Set model id
 model_id = "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF"
 

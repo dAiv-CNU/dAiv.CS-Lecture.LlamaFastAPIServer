@@ -1,7 +1,7 @@
 
-import os
-from urllib.request import Request
+import ssl
 
+import websockets
 from pydantic import BaseModel
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -17,9 +17,6 @@ manager = ConnectionManager()
 token_streamer = llama3.token_streamer
 app = FastAPI()
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SSL_KEYFILE = os.path.join(BASE_DIR, "../../certs/localhost.key")
-SSL_CERTFILE = os.path.join(BASE_DIR, "../../certs/localhost.crt")
 
 
 class Message(BaseModel):
@@ -27,6 +24,13 @@ class Message(BaseModel):
 
 
 clients_histories = dict()
+
+'''def get_recommendation(client_id,data):
+    k = ""
+    tokens, print_prompt = llama3.chat(clients_histories[client_id], data)
+    for token in llama3.token_streamer(tokens, print_prompt):
+        k += token
+    return k'''
 
 
 def get_recommendation(data):
@@ -37,9 +41,24 @@ def get_recommendation(data):
     return k
 
 
+@app.get("/client")
+async def root():
+    return clients_histories
+
+
 @app.get("/chat")
 async def chat():
     return chat_history
+
+@app.post("/practice")
+async def practice(data:str):
+    uri = f"ws://localhost:8000/ws/156"
+    async with websockets.connect(uri) as websocket:
+        await websocket.send(data)
+        answer = await websocket.recv()
+        return answer
+
+
 
 
 @app.post("/chat_response/")
@@ -54,16 +73,22 @@ async def chat_response(message: str):
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await manager.connect(websocket)
-
+    '''
+    chat_history.clear()
+    try:
+        print(clients_histories[client_id])
+    except:
+        clients_histories[client_id] = chat_history
+        '''
     try:
         while True:
             data = await websocket.receive_text()
             message = f"Client: {data}"
             await manager.broadcast(message)
-
             server_response = f'response : {get_recommendation(data)}'
             chat_history.append('Answer', server_response[10:])
-            await manager.send_personal_message(server_response, websocket)
+            #await manager.send_personal_message(server_response, websocket)
+            await manager.broadcast(server_response)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         await manager.broadcast(f"Client #{client_id} left the chat")
@@ -76,40 +101,128 @@ async def get():
     <html>
         <head>
             <title>Chat</title>
+            <!-- Bootstrap CSS 추가 -->
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+            <!-- Font Awesome 아이콘 추가 -->
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+            <!-- Custom CSS 추가 -->
+            <style>
+                body {
+                    background-color: #f4f6f9;
+                    font-family: 'Arial', sans-serif;
+                }
+                .chat-container {
+                    max-width: 600px;
+                    margin: 50px auto;
+                    padding: 20px;
+                    background-color: #ffffff;
+                    border-radius: 10px;
+                    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+                    border: 1px solid #ddd;
+                }
+                h1 {
+                    font-size: 28px;
+                    margin-bottom: 20px;
+                    color: #333;
+                    text-align: center;
+                }
+                #messages {
+                    list-style-type: none;
+                    padding: 0;
+                    margin: 0;
+                    height: 400px;
+                    overflow-y: auto;
+                    border-bottom: 1px solid #ddd;
+                    padding-bottom: 10px;
+                }
+                #messages li {
+                    padding: 12px 15px;
+                    border-radius: 15px;
+                    margin-bottom: 10px;
+                    max-width: 80%;
+                    word-wrap: break-word;
+                    display: inline-block;
+                    clear: both;
+                }
+                .message-client {
+                    background-color: #e1f5fe;
+                    color: #0277bd;
+                    text-align: left;
+                    margin-left: auto;
+                    border: 1px solid #b3e5fc;
+                    border-radius: 15px;
+                    float: right;
+                }
+                .message-server {
+                    background-color: #ffe0b2;
+                    color: #e65100;
+                    text-align: left;
+                    border: 1px solid #ffcc80;
+                    border-radius: 15px;
+                    float: left;
+                }
+                .form-inline {
+                    display: flex;
+                    align-items: center;
+                    margin-top: 20px;
+                }
+                .form-control {
+                    border-radius: 25px;
+                    padding: 10px;
+                    border: 1px solid #ddd;
+                    box-shadow: none;
+                }
+                .form-control:focus {
+                    border-color: #0277bd;
+                    box-shadow: 0 0 0 0.2rem rgba(2, 119, 189, 0.25);
+                }
+                .btn-primary {
+                    border-radius: 25px;
+                    padding: 10px 20px;
+                }
+            </style>
         </head>
         <body>
-            <h1>gpt 도전기</h1>
-            <form id="form">
-                <input type="text" id="messageText" autocomplete="off"/>
-                <button>Send</button>
-            </form>
-            <ul id="messages"></ul>
+            <div class="container chat-container">
+                <h1 class="mb-4">GPT 도전기</h1>
+                <ul id="messages"></ul>
+                <form id="form" class="form-inline">
+                    <input type="text" id="messageText" class="form-control mr-2" autocomplete="off" placeholder="Type your message here..."/>
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
+            </div>
             <script>
-                var client_id = Date.now()
+                // 클라이언트 ID를 현재 시간으로 생성
+                var client_id = Date.now();
+
+                // WebSocket URL을 템플릿 리터럴을 사용하여 생성
                 var ws = new WebSocket(`wss://127.0.0.1:8000/ws/${client_id}`);
 
                 // 메시지를 수신하여 화면에 출력
                 ws.onmessage = function(event) {
-                    var messages = document.getElementById('messages')
-                    var message = document.createElement('li')
-                    var content = document.createTextNode(event.data)
-                    message.appendChild(content)
-                    messages.appendChild(message)
+                    var messages = document.getElementById('messages');
+                    var message = document.createElement('li');
+                    message.className = 'message message-server';
+                    message.textContent = event.data;
+                    messages.appendChild(message);
+                    messages.scrollTop = messages.scrollHeight;
                 };
 
                 // 폼 제출 시 메시지를 전송하고, 화면에 출력
-                var form = document.getElementById('form')
+                var form = document.getElementById('form');
                 form.addEventListener('submit', function(event) {
-                    event.preventDefault()
-                    var input = document.getElementById("messageText")
-                    var content = document.createTextNode(input.value)  // content 변수를 여기서 정의
-                
-                    ws.send(input.value)  // 서버로 메시지 전송
-                
+                    event.preventDefault();  // 폼 제출로 인한 페이지 새로 고침 방지
+                    var input = document.getElementById("messageText");
+                    var messageText = input.value;  // 입력값 저장
+
+                   // 사용자 입력 메시지를 화면에 표시
                     
-                
-                    input.value = ''  // 입력란 초기화
-                })
+
+                    ws.send(messageText);  // 서버로 메시지 전송
+
+                    input.value = '';  // 입력란 초기화
+                    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+                });
             </script>
         </body>
     </html>
@@ -121,7 +234,7 @@ if __name__ == '__main__':
         app,
         host="127.0.0.1",
         port=8000,
-        ssl_certfile = SSL_CERTFILE,  # Add SSL certificate file
-        ssl_keyfile = SSL_KEYFILE,
+        ssl_keyfile="../../certs/localhost.key",
+        ssl_certfile="../../certs/localhost.crt",
 
     )

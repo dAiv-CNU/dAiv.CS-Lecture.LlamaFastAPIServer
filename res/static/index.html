@@ -1,126 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat</title>
-    <!-- Bootstrap CSS 추가 -->
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- Font Awesome 아이콘 추가 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <!-- Custom CSS 추가 -->
-    <style>
-        body {
-            background-color: #f4f6f9;
-            font-family: 'Arial', sans-serif;
-        }
-        .chat-container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            border: 1px solid #ddd;
-        }
-        h1 {
-            font-size: 28px;
-            margin-bottom: 20px;
-            color: #333;
-            text-align: center;
-        }
-        #messages {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-            height: 400px;
-            overflow-y: auto;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
-        }
-        #messages li {
-            padding: 12px 15px;
-            border-radius: 15px;
-            margin-bottom: 10px;
-            max-width: 80%;
-            word-wrap: break-word;
-            display: inline-block;
-            clear: both;
-        }
-        .message-client {
-            background-color: #e1f5fe;
-            color: #0277bd;
-            text-align: left;
-            margin-left: auto;
-            border: 1px solid #b3e5fc;
-            border-radius: 15px;
-            float: right;
-        }
-        .message-server {
-            background-color: #ffe0b2;
-            color: #e65100;
-            text-align: left;
-            border: 1px solid #ffcc80;
-            border-radius: 15px;
-            float: left;
-        }
-        .form-inline {
-            display: flex;
-            align-items: center;
-            margin-top: 20px;
-        }
-        .form-control {
-            border-radius: 25px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            box-shadow: none;
-        }
-        .form-control:focus {
-            border-color: #0277bd;
-            box-shadow: 0 0 0 0.2rem rgba(2, 119, 189, 0.25);
-        }
-        .btn-primary {
-            border-radius: 25px;
-            padding: 10px 20px;
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3/brython_stdlib.js"></script>
+
+    <link rel="stylesheet" href="/index.css">
+    <script type="text/python" src="/index.py"></script>
 </head>
-<body>
-<div class="container chat-container">
-    <h1 class="mb-4">GPT 도전기</h1>
-    <ul id="messages"></ul>
-    <form id="form" class="form-inline">
-        <input type="text" id="messageText" class="form-control mr-2" autocomplete="off" placeholder="Type your message here..."/>
-        <button type="submit" class="btn btn-primary">Send</button>
-    </form>
-</div>
-<script>
-    // WebSocket URL을 템플릿 리터럴을 사용하여 생성
-    var ws = new WebSocket(`ws://127.0.0.1:8000/ws}`);
+<body onload="brython()">
+    <div class="container chat-container">
+        <h1 class="mb-4">GPT 도전기</h1>
+        <ul id="messages"></ul>
+        <form id="form" class="form-inline">
+            <input type="text" id="messageText" class="form-control mr-2" autocomplete="off" placeholder="Type your message here..."/>
+            <button type="submit" class="btn btn-dark btn-send">Send</button>
+        </form>
+    </div>
+    <script>
+        // WebSocket URL을 템플릿 리터럴을 사용하여 생성
+        var ws = new WebSocket(`ws://127.0.0.1:8000/ws}`);
 
-    // 메시지를 수신하여 화면에 출력
-    ws.onmessage = function(event) {
-        var messages = document.getElementById('messages');
-        var message = document.createElement('li');
-        message.className = 'message message-server';
-        message.textContent = event.data;
-        messages.appendChild(message);
-        messages.scrollTop = messages.scrollHeight;
-    };
+        // 메시지를 수신하여 화면에 출력
+        ws.onmessage = function(event) {
+            var messages = document.getElementById('messages');
+            var message = document.createElement('li');
+            message.className = 'message message-server';
+            message.textContent = event.data;
+            messages.appendChild(message);
+            messages.scrollTop = messages.scrollHeight;
+        };
 
-    // 폼 제출 시 메시지를 전송하고, 화면에 출력
-    var form = document.getElementById('form');
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();  // 폼 제출로 인한 페이지 새로 고침 방지
-        var input = document.getElementById("messageText");
-        var messageText = input.value;  // 입력값 저장
+        // 폼 제출 시 메시지를 전송하고, 화면에 출력
+        var form = document.getElementById('form');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();  // 폼 제출로 인한 페이지 새로 고침 방지
+            var input = document.getElementById("messageText");
+            var messageText = input.value;  // 입력값 저장
 
-        // 사용자 입력 메시지를 화면에 표시
+            // 사용자 입력 메시지를 화면에 표시
 
 
-        ws.send(messageText);  // 서버로 메시지 전송
+            ws.send(messageText);  // 서버로 메시지 전송
 
-        input.value = '';  // 입력란 초기화
-        document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-    });
-</script>
+            input.value = '';  // 입력란 초기화
+            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+        });
+    </script>
 </body>
 </html>

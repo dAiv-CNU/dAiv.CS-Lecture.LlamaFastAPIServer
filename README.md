@@ -1,5 +1,7 @@
 # Llama Fast API Server
 
+![Screenshot](./res/image/screenshot.png)
+
 ## Installation
 
 ### FastAPI

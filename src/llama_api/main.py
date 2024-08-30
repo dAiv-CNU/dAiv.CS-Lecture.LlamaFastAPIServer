@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from typing import List, Optional
 from pydantic import BaseModel
 import uvicorn
+import json
 
 from model import llama3
 from model.llama3 import ChatHistory
@@ -38,12 +39,11 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
 
     chat_history = ChatHistory()
+    chat_history.extend(json.loads(await websocket.receive_text()))
     user_prompt = await websocket.receive_text()
 
-    answer = ''
     for token in token_streamer(*llama3.chat(chat_history, user_prompt)):
-        answer += token
-    await websocket.send_text(answer)
+        await websocket.send_text(token)
 
     await websocket.close()
 

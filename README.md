@@ -1,6 +1,6 @@
 # Llama Fast API Server
 
-![Screenshot](./res/image/screenshot.png)
+<img src="./res/image/screenshot.png" style="border: 0.1px solid grey; border-radius: 10px"/>
 
 ## Installation
 

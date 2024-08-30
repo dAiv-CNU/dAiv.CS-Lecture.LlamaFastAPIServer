@@ -2,6 +2,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.staticfiles import StaticFiles
 from typing import List, Optional
 from pydantic import BaseModel
+import asyncio
 import uvicorn
 import json
 
@@ -44,7 +45,9 @@ async def websocket_endpoint(websocket: WebSocket):
 
     for token in token_streamer(*llama3.chat(chat_history, user_prompt)):
         await websocket.send_text(token)
+        await asyncio.sleep(0.001)  # 1ms delay between tokens
 
+    await websocket.send_text("<EOS>")  # EOS toke to signal the end of the conversation
     await websocket.close()
 
 

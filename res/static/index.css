@@ -128,6 +128,7 @@ h1:hover {
     box-shadow: none;
     flex-grow: 1;
     resize: none;
+    overflow-y: hidden;
     max-height: 100px;
     min-height: 20px;
 }

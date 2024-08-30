@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat</title>
+    <title>Chat with Llama3.1</title>
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -11,56 +11,27 @@
     <script src="https://cdn.jsdelivr.net/npm/brython@3/brython_stdlib.js"></script>
 
     <link rel="stylesheet" href="/index.css">
+    <script type="text/python">
+        import browser
+
+        def module_init(_id, module_name):
+            import sys
+            sys.modules[module_name] = sys.modules[_id]
+            return browser.window.console.log, print
+
+        browser.__dict__['module_init'] = module_init  # 모듈 초기화 함수 등록
+    </script>
+    <script type="text/python" src="/model/config.py"></script>
     <script type="text/python" src="/index.py"></script>
 </head>
 <body onload="brython()">
-    <h1 class="mb-4">llama3.1</h1>
+    <h1 class="mb-4">Llama3.1</h1>
     <div class="container chat-container">
         <ul id="messages"></ul>
         <form id="form" class="form-inline">
-            <textarea id="messageText" class="form-control mr-2" autocomplete="off" placeholder="메시지 llama3.1"></textarea>
+            <textarea id="message_text" class="form-control mr-2" autocomplete="off" placeholder="메시지 Llama3.1"></textarea>
             <button type="submit" class="btn btn-icon"><i class="fas fa-arrow-up"></i></button>
         </form>
     </div>
-    <script>
-        var ws = new WebSocket(`ws://127.0.0.1:8000/ws`);
-
-        ws.onmessage = function(event) {
-            var messages = document.getElementById('messages');
-            var message = document.createElement('li');
-            message.className = 'message message-server';
-            message.innerHTML = `<i class="fas fa-robot icon"></i> ${event.data}`; // 아이콘을 왼쪽에 추가
-            messages.appendChild(message);
-            messages.scrollTop = messages.scrollHeight;
-        };
-
-        var form = document.getElementById('form');
-        var messageText = document.getElementById("messageText");
-
-        messageText.addEventListener("keydown", function(event) {
-            if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault(); // 기본 Enter 동작 방지
-                form.requestSubmit(); // 폼 전송
-            }
-        });
-
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            var messageTextValue = messageText.value.trim();
-
-            if (messageTextValue !== "") {
-                var messages = document.getElementById('messages');
-                var userMessage = document.createElement('li');
-                userMessage.className = 'message message-user'; // 오른쪽 정렬을 위한 클래스
-                userMessage.textContent = messageTextValue;
-                messages.appendChild(userMessage);
-
-                ws.send(messageTextValue);
-
-                messageText.value = '';
-                messages.scrollTop = messages.scrollHeight;
-            }
-        });
-    </script>
 </body>
 </html>

@@ -8,12 +8,12 @@
 
 #### Windows
 ```bash
-pip install fastapi
+pip install fastapi uvicorn websockets huggingface_hub
 ```
 
 #### macOS
 ```bash
-pip3 install fastapi
+pip3 install fastapi uvicorn websockets huggingface_hub
 ```
 
 

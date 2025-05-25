@@ -45,7 +45,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
     for token in token_streamer(*llama3.chat(chat_history, user_prompt)):
         await websocket.send_text(token)
-        await asyncio.sleep(0.001)  # 1ms delay between tokens
+        await asyncio.sleep(0.0001)  # 0.1ms delay between tokens
 
     await websocket.send_text("<EOS>")  # EOS toke to signal the end of the conversation
     await websocket.close()
